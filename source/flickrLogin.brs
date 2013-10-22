@@ -34,7 +34,7 @@ Sub LoginToFlickr()
 '
     key = "1e02a9e8a9a74aa51ab3baf3beb52cb0"
     secret = "c7781d3b7aa0807f"
-    auth_num = "00000000000000000"
+    auth_num = "72157636818611425"
 
 	' Pop up start of UI for some instant feedback while we load the icon data
 	poster=uitkPreShowPosterMenu()
