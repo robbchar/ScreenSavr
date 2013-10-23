@@ -207,26 +207,26 @@ Sub DisplaySlideShow(ss, photolist)
 	ss.SetPeriod(3)
 	onscreenphoto=[0]  'using a list so i can pass reference instead of pass by value 
 	port=ss.GetMessagePort()
-	
+DrawImages(photolist)	
 '
 ' add all the photos to the slide show as fast as possible, while still processing events
 '
-	while photolist.IsNext()
-		m.AddNextPhotoToSlideShow(ss, photolist)
-		while true
-			msg = port.GetMessage()
-			if msg=invalid then exit while
-			if m.ProcessSlideShowEvent(ss, msg, photolist, onscreenphoto) then return
-		end while
-	end while
+'	while photolist.IsNext()
+'		m.AddNextPhotoToSlideShow(ss, photolist)
+'		while true
+'			msg = port.GetMessage()
+'			if msg=invalid then exit while
+'			if m.ProcessSlideShowEvent(ss, msg, photolist, onscreenphoto) then return
+'		end while
+'	end while
 	
 	'
 	' all photos have been added to the slide show at this point, so just process events
 	'
-	while true
-		msg = wait(0, port)
-		if m.ProcessSlideShowEvent(ss, msg, photolist, onscreenphoto) then return
-	end while
+'	while true
+'		msg = wait(0, port)
+'		if m.ProcessSlideShowEvent(ss, msg, photolist, onscreenphoto) then return
+'	end while
 
 End Sub
 
@@ -323,7 +323,6 @@ End Function
 
 
 Function IsLinked() As Boolean
-print "m: " + Type(m)
 	return m.auth_token<>invalid
 
 End Function
@@ -463,7 +462,6 @@ End Function
 
 
 Sub DisplayMyPhotoStream()
-print "DisplayMyPhotoStream"
 	if not DoFlickrAccountLink(m) then  ' in accountlink.brs  -- calling outside flickrtoolkit!!!!
 		print "DisplayMyPhotoStream: Account not linked:"
 		return

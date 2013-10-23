@@ -10,21 +10,13 @@ Sub RunScreenSaver()
 	LoginToFlickr()
 End Sub
 
-' The screensaver entry point.
-Sub notRunScreenSaver()
-   api_url = "http://www.cutecaptions.com/roku-api.php"
-   json = fetch_JSON(api_url)
 
-   maxWidth = 400
-   maxHeight = null
-   ypos = 0
+Sub DrawImages(photolist)
+
    di = CreateObject("roDeviceInfo")
    displayMode = di.GetDisplayMode()
    screenWidth = int(di.GetDisplaySize().w)
    screenHeight = int(di.GetDisplaySize().h)
-   captionBoxWidth = 600
-   captionY = null  ' will set this based on aspect ratio later
-   captionX = int((screenWidth / 2) - (captionBoxWidth / 2))
 
    canvas = CreateObject("roImageCanvas")
    port = CreateObject("roMessagePort")
@@ -33,15 +25,15 @@ Sub notRunScreenSaver()
    canvas.SetRequireAllImagesToDraw(false)
 
    while(true)
-      for each img in json
+      for each photo in photolist
       
-        width = int(img.width)
-        height = int(img.height)
+      ' RC until I can figure out how to get this from the image xml
+        width = screenWidth ' int(img.width)
+        height = screenHeight ' int(img.height)
 
         ' calculate the image x axis so we can center it
 
         if (displayMode = "480i") then
-          captionY = int(screenHeight) - 75
           maxHeight = 370
           
           if (width > maxWidth)
@@ -53,7 +45,6 @@ Sub notRunScreenSaver()
           end if
         else 
 
-          captionY = int(screenHeight) - 125
           maxHeight = int(screenHeight) - 185
 
         end if
@@ -70,26 +61,28 @@ Sub notRunScreenSaver()
           height = int(height * percentToScale)
       end if
 
+		' RC ditto
+      xpos = 0 ' (screenWidth / 2)  -  (width / 2)
+      xpos = 0 ' int(xpos)
 
-      xpos = (screenWidth / 2)  -  (width / 2)
-      xpos = int(xpos)
+      ypos = 0 ' (screenHeight / 2) - (height / 2)
+      ypos = 0 ' int(ypos - 30)
 
-      ypos = (screenHeight / 2) - (height / 2)
-      ypos = int(ypos - 30)
-
+print "photo.GetURL:"
+print photo.GetURL()
       canvasItems = [
           {   
-              url:img.url
+              url:photo.GetURL()
               TargetRect:{x:xpos,y:ypos,w:width,h:height}
 
           },
           { 
-              Text:img.title
+              Text:"an image" ' RC use this till the description can be gotten
               TextAttrs:{Color:"#FFCCCCCC", Font:"Medium",
               HAlign:"HCenter", VAlign:"VCenter",
               Direction:"LeftToRight"}
-              ' TargetRect:{x:390,y:captionY,w:500,h:60}
-              TargetRect:{x:captionX,y:captionY,w:captionBoxWidth,h:60}
+              TargetRect:{x:390,y:0,w:500,h:60}
+              ' TargetRect:{x:captionX,y:captionY,w:captionBoxWidth,h:60}
           }
       ] 
 
@@ -110,17 +103,3 @@ Sub notRunScreenSaver()
    end while
     
 End Sub
-
-
-
-Function fetch_JSON(url as string) as Object
-
-    print "fetching new JSON"
-
-    xfer=createobject("roURLTransfer")
-    xfer.seturl(url)
-    data=xfer.gettostring()
-    json = ParseJSON(data)
-
-    return json
-End Function
