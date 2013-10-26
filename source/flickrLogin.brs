@@ -32,33 +32,37 @@ print "LoginToFlickr"
 ' The following need to be setup for this application to work with flickr.
 ' You can get the information from this link:      http://www.flickr.com/services/api/auth.howto.web.html
 '
-    key = "1e02a9e8a9a74aa51ab3baf3beb52cb0"
-    secret = "c7781d3b7aa0807f"
-    auth_num = "72157636818611425"
+    if RegRead("authorized")=invalid then
+     	RegWrite("key", "1e02a9e8a9a74aa51ab3baf3beb52cb0")
+	    RegWrite("secret", "c7781d3b7aa0807f")
+	    RegWrite("auth_num", "72157636818611425")
+	    RegWrite("authorized", "false")
 
-	' Pop up start of UI for some instant feedback while we load the icon data
-	poster=uitkPreShowPosterMenu()
-	if poster=invalid then
-		print "unexpected error in uitkPreShowPosterMenu"
-		return
-	end if
+		' Pop up start of UI for some instant feedback while we load the icon data
+		poster=uitkPreShowPosterMenu()
+		if poster=invalid then
+			print "unexpected error in uitkPreShowPosterMenu"
+			return
+		end if
 
-	
+	    RegWrite("authorized", "true")
+    end if
+
 	' Create a flickr connection object.  
 	' Defined in the flickrtoolkit.brs.  
 	' Pass in our API KEY and SECRET(get it from flickr.com)
+	key = RegRead("key")
+	secret = RegRead("secret")
 	flickr=CreateFlickrConnection(key, secret)
 	if flickr=invalid then
 		print "unexpected error in CreateFlickrConnection"
 		return
 	end if
-
+	auth_num = RegRead("auth_num")
     flickr.auth_num = auth_num
-    
-	flickr.DisplayMyPhotoStream()
-	print "end LoginToFlickr"
-End Sub
 
+	flickr.DisplayMyPhotoStream()
+End Sub
 
 ' ******************************************************
 ' Setup theme for the application 

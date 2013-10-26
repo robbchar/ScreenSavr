@@ -59,7 +59,6 @@ Sub Sort(A as Object, key=invalid as dynamic)
             end while
             A[j+1] = value
         next
-
     else
         if type(key)<>"Function" then return
         for i = 1 to A.Count()-1
@@ -72,7 +71,5 @@ Sub Sort(A as Object, key=invalid as dynamic)
             end while
             A[j+1] = value
         next
-
     end if
-
 End Sub

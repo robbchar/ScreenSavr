@@ -22,10 +22,11 @@
 ' ********************************************************************
 
 Function CreateFlickrConnection(api_key, api_secret=invalid)As Object
+	auth_token=RegRead("auth_token")
 	flickr = {
 		api_key: api_key,
-		api_secret: api_secret
-		auth_token: RegRead("auth_token"),
+		api_secret: api_secret,
+		auth_token: auth_token,
 		http: CreateObject("roUrlTransfer"),
 
 		DisplayInterestingPhotos: DisplayInterestingPhotos,
@@ -207,7 +208,8 @@ Sub DisplaySlideShow(ss, photolist)
 	ss.SetPeriod(3)
 	onscreenphoto=[0]  'using a list so i can pass reference instead of pass by value 
 	port=ss.GetMessagePort()
-DrawImages(photolist)	
+
+	DrawImages(photolist, m)	
 '
 ' add all the photos to the slide show as fast as possible, while still processing events
 '
@@ -259,6 +261,8 @@ REM      photo.GetOwner()
 REM
 
 Function newPhotoFromXML(http As Object, xml As Object, owner As dynamic) As Object
+
+
   photo = CreateObject("roAssociativeArray")
   photo.http=http
   photo.xml=xml
@@ -267,6 +271,7 @@ Function newPhotoFromXML(http As Object, xml As Object, owner As dynamic) As Obj
   photo.GetID=function():return m.xml@id:end function
   photo.GetOwner=pGetOwner
   photo.GetURL=pGetURL
+
   return photo
 End Function
 
@@ -324,24 +329,18 @@ End Function
 
 Function IsLinked() As Boolean
 	return m.auth_token<>invalid
-
 End Function
 
 Function LinkAccount(mini_token) As Boolean
 
-	'print "LinkAcccout: mini_token=";mini_token
+	print "LinkAcccout: mini_token=";mini_token
 	api_sig = m.MakeApiSig("flickr.auth.getFullToken",[],mini_token)
-	'print api_sig
 	apiurlstr="http://api.flickr.com/services/rest/?method=flickr.auth.getFullToken&api_key="+m.api_key+"&mini_token="+mini_token+"&api_sig="+api_sig
-
-	'print apiurlstr
 
 	m.http.SetUrl(apiurlstr)
 	xml=m.http.GetToString()
 	rsp=CreateObject("roXMLElement")
 	if not rsp.Parse(xml) then stop
-
-	'print rsp@stat
 
 	if rsp@stat<>"ok" then return false
 
@@ -595,7 +594,9 @@ End Function
 Function psGetPhotos() as Object
 	rsp=m.flickr.ExecServerAPI("flickr.photosets.getPhotos", ["photoset_id="+m.GetID()])
 	' note: each photo entry in the photo set does not have an owner, hence the need to pass it in below
-	return newPhotoListFromXML(m.flickr.http, rsp.photoset.photo, m.owner)
+	photolist = newPhotoListFromXML(m.flickr.http, rsp.photoset.photo, m.owner)
+	
+	return photolist
 End Function
 
 Function pGetPrimaryURL(size="") As String
@@ -857,11 +858,10 @@ End Function
 ' ********************************************************************
 
 Sub GetPhotoInfo(photo_id, info, taglist)
-
 	rsp=m.ExecServerAPI("flickr.photos.getInfo",["photo_id="+photo_id])
 	if rsp@stat<>"ok" then return
 
-	info.TextOverlayUL="Title: "+rsp.photo.title.GetText()
+	info.TextOverlayUL=rsp.photo.title.GetText()
 	info.TextOverlayUR="More Options -> Nav Down"
 	
 	if rsp.photo.owner@realname<>"" then 
